@@ -7,20 +7,20 @@ interface IUnpackedMsg {
     senderKey: any
 }
 
-export class PackUnpack {
+export class DIDComm {
 
     public readonly Ready: Promise<undefined>
     private sodium: any
 
     /**
-     * Creates a new PackUnpack object. The returned object contains a .Ready property:
+     * Creates a new DIDComm object. The returned object contains a .Ready property:
      * a promise that must be resolved before the object can be used. You can
      * simply `await` the resolution of the .Ready property.
      *
      * Example:
-     * const packUnpack = new PackUnpack
+     * const didcomm = new DIDComm
      * (async () => {
-     *  await packUnpack.Ready
+     *  await didcomm.Ready
      * }())
      */
     constructor() {
@@ -101,6 +101,13 @@ export class PackUnpack {
         }
     }
 
+    public b64dec(input: string) {
+        while (input.length % 4 !== 0) {
+          input += '='
+        }
+        return this.sodium.from_base64(input, this.sodium.base64_variants.URLSAFE)
+    }
+
     /**
      * Uses libsodium to generate a key pair, you may pass these keys into the pack/unpack functions
      */
@@ -110,10 +117,6 @@ export class PackUnpack {
 
     private b64url(input: any) {
         return this.sodium.to_base64(input, this.sodium.base64_variants.URLSAFE)
-    }
-
-    private b64dec(input: any) {
-        return this.sodium.from_base64(input, this.sodium.base64_variants.URLSAFE)
     }
 
     private strB64dec(input: any) {
