@@ -73,8 +73,8 @@ export class DIDComm {
      * @param toKeys public key of the entity encrypting message for
      * @param fromKeys keypair of person encrypting message
      */
-    public async packMessage(
-        message: string, toKeys: Uint8Array[], fromKeys: sodium.KeyPair | null = null): Promise<string> {
+    public packMessage(
+        message: string, toKeys: Uint8Array[], fromKeys: sodium.KeyPair | null = null): string {
 
         const [recipsJson, cek] = this.prepareRecipientKeys(toKeys, fromKeys)
         const recipsB64 = this.b64url(recipsJson)
@@ -94,7 +94,7 @@ export class DIDComm {
      * @param encMsg message to be decrypted
      * @param toKeys key pair of party decrypting the message
      */
-    public async unpackMessage(encMsg: string, toKeys: sodium.KeyPair): Promise<IUnpackedMsg> {
+    public unpackMessage(encMsg: string, toKeys: sodium.KeyPair): IUnpackedMsg {
 
         let wrapper
         if (typeof encMsg === 'string') {

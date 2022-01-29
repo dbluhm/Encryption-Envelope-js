@@ -17,8 +17,8 @@ describe('pack and unpack', () => {
     const bob = didcomm.generateKeyPair()
     const message = 'I AM A PRIVATE MESSAGE'
 
-    const packedMsg = await didcomm.packMessage(message, [bob.publicKey], alice)
-    const unpackedMsg = await didcomm.unpackMessage(packedMsg, bob)
+    const packedMsg = didcomm.packMessage(message, [bob.publicKey], alice)
+    const unpackedMsg = didcomm.unpackMessage(packedMsg, bob)
     expect(unpackedMsg.message).toEqual(message)
   })
 })
