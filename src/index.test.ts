@@ -37,19 +37,19 @@ describe('b64 decoding', () => {
 })
 
 describe('attachment signing and verification', () => {
-  it('signs and verifies', async() => {
+  it('signs and verifies', async () => {
     const didcomm = new DIDComm()
     await didcomm.Ready
-    let keys = didcomm.generateKeyPair()
-    let res = didcomm.signedAttachment({test: "test"}, keys)
+    const keys = didcomm.generateKeyPair()
+    const res = didcomm.signedAttachment({test: 'test'}, keys)
     expect(didcomm.verifySignedAttachment(res)).toEqual(true)
   })
-  it('decodes signed attachments', async() => {
+  it('decodes signed attachments', async () => {
     const didcomm = new DIDComm()
     await didcomm.Ready
-    let keys = didcomm.generateKeyPair()
-    let payload = {test: "test"}
-    let res = didcomm.signedAttachment(payload, keys)
+    const keys = didcomm.generateKeyPair()
+    const payload = {test: 'test'}
+    const res = didcomm.signedAttachment(payload, keys)
     expect(didcomm.decodeSignedAttachment(res)).toEqual(payload)
   })
 })

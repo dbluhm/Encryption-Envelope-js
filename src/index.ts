@@ -7,17 +7,32 @@ interface IUnpackedMsg {
     senderKey: any
 }
 
-interface SignedAttachment {
-  "mime-type": string,
+interface ISignedAttachment {
+  'mime-type': string,
   data: {
     base64: string,
     jws: {
       header: {
-        kid: string
+        kid: string,
       },
       protected: string,
-      signature: string
+      signature: string,
+    },
+  },
+}
+
+class Ed25519PubEncoder {
+  public name = 'ed25519-pub'
+  public code = 0xed01
+
+  public encode(bytes: Uint8Array): string {
+    return `did:key:z${Base58.encode([this.code, ...bytes])}`
+  }
+  public decode(key: string): Uint8Array {
+    if (!key.startsWith('did:key:z6Mk')) {
+      throw new Error('Only ed25519 keys are supported')
     }
+    return Base58.decode(key.slice('did:key:z'.length)).slice(2)
   }
 }
 
@@ -25,6 +40,8 @@ export class DIDComm {
 
     public readonly Ready: Promise<undefined>
     private sodium: any
+
+    private ed25519PubEncoder = new Ed25519PubEncoder()
 
     /**
      * Creates a new DIDComm object. The returned object contains a .Ready property:
@@ -129,56 +146,44 @@ export class DIDComm {
         return this.sodium.crypto_sign_keypair()
     }
 
-    private ed25519PubEncoder = {
-      name: 'ed25519-pub',
-      code: 0xed01,
-      encode: (bytes: Uint8Array): string => `did:key:z${Base58.encode([this.ed25519PubEncoder.code, ...bytes])}`,
-      decode: (key: string): Uint8Array => {
-        if (!key.startsWith('did:key:z6Mk')) {
-          throw new Error('Only ed25519 keys are supported')
-        }
-        return Base58.decode(key.slice('did:key:z'.length)).slice(2)
-      }
-    }
-
-    public signedAttachment(data: any, keys: sodium.KeyPair): SignedAttachment {
-      let didkey = this.ed25519PubEncoder.encode(keys.publicKey)
-      let protectedHeaders = this.b64url(JSON.stringify({
+    public signedAttachment(data: any, keys: sodium.KeyPair): ISignedAttachment {
+      const didkey = this.ed25519PubEncoder.encode(keys.publicKey)
+      const protectedHeaders = this.b64url(JSON.stringify({
         alg: 'EdDSA',
-        kid: didkey,
         jwk: {
-          kty: 'OKP',
           crv: 'Ed25519',
+          kid: didkey,
+          kty: 'OKP',
           x: this.b64url(keys.publicKey),
-          kid: didkey
-        }
+        },
+        kid: didkey,
       }))
-      let sig_data = this.b64url(JSON.stringify(data))
+      const sigData = this.b64url(JSON.stringify(data))
       return {
-        "mime-type": "application/json",
-        data: {
-          base64: sig_data,
+        'data': {
+          base64: sigData,
           jws: {
             header: {kid: didkey},
             protected: protectedHeaders,
             signature: this.b64url(this.sodium.crypto_sign_detached(
-              Buffer.from(`${protectedHeaders}.${sig_data}`, 'ascii'),
-              keys.privateKey
-            ))
-          }
-        }
+              Buffer.from(`${protectedHeaders}.${sigData}`, 'ascii'),
+              keys.privateKey,
+            )),
+          },
+        },
+        'mime-type': 'application/json',
       }
     }
 
-    public verifySignedAttachment(attachment: SignedAttachment) {
-      let signedInput = Buffer.from(`${attachment.data.jws.protected}.${attachment.data.base64}`)
-      let signature = this.b64dec(attachment.data.jws.signature)
+    public verifySignedAttachment(attachment: ISignedAttachment) {
+      const signedInput = Buffer.from(`${attachment.data.jws.protected}.${attachment.data.base64}`)
+      const signature = this.b64dec(attachment.data.jws.signature)
       return sodium.crypto_sign_verify_detached(
-        signature, signedInput, this.ed25519PubEncoder.decode(attachment.data.jws.header.kid)
+        signature, signedInput, this.ed25519PubEncoder.decode(attachment.data.jws.header.kid),
       )
     }
 
-    public decodeSignedAttachment(attachment: SignedAttachment) {
+    public decodeSignedAttachment(attachment: ISignedAttachment) {
       return JSON.parse(this.strB64dec(attachment.data.base64))
     }
 
