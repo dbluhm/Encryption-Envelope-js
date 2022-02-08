@@ -42,7 +42,6 @@ export class DIDComm {
     public ed25519PubEncoder = new Ed25519PubEncoder()
     private sodium: any
 
-
     /**
      * Creates a new DIDComm object. The returned object contains a .Ready property:
      * a promise that must be resolved before the object can be used. You can
