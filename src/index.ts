@@ -39,9 +39,9 @@ class Ed25519PubEncoder {
 export class DIDComm {
 
     public readonly Ready: Promise<undefined>
+    public ed25519PubEncoder = new Ed25519PubEncoder()
     private sodium: any
 
-    public ed25519PubEncoder = new Ed25519PubEncoder()
 
     /**
      * Creates a new DIDComm object. The returned object contains a .Ready property:
