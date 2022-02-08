@@ -153,11 +153,11 @@ export class DIDComm {
           crv: 'Ed25519',
           kid: didkey,
           kty: 'OKP',
-          x: this.b64url(keys.publicKey),
+          x: this.b64url(keys.publicKey, false),
         },
         kid: didkey,
-      }))
-      const sigData = this.b64url(JSON.stringify(data))
+      }), false)
+      const sigData = this.b64url(JSON.stringify(data), false)
       return {
         'data': {
           base64: sigData,
