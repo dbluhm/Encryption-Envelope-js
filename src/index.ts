@@ -167,7 +167,7 @@ export class DIDComm {
             signature: this.b64url(this.sodium.crypto_sign_detached(
               Buffer.from(`${protectedHeaders}.${sigData}`, 'ascii'),
               keys.privateKey,
-            )),
+            ), false),
           },
         },
         'mime-type': 'application/json',
@@ -186,8 +186,14 @@ export class DIDComm {
       return JSON.parse(this.strB64dec(attachment.data.base64))
     }
 
-    private b64url(input: any) {
-        return this.sodium.to_base64(input, this.sodium.base64_variants.URLSAFE)
+    private b64url(input: any, pad: boolean = true) {
+      let padding = null
+      if (pad) {
+        padding = this.sodium.base64_variants.URLSAFE
+      } else {
+        padding = this.sodium.base64_variants.URLSAFE_NO_PADDING
+      }
+      return this.sodium.to_base64(input, padding)
     }
 
     private strB64dec(input: any) {
