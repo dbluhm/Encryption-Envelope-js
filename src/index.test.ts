@@ -53,3 +53,13 @@ describe('attachment signing and verification', () => {
     expect(didcomm.decodeSignedAttachment(res)).toEqual(payload)
   })
 })
+
+describe('can access did:key encoder', () => {
+  it('can endcode and decode a ed25519 key as did:key', async () => {
+    const didcomm = new DIDComm()
+    await didcomm.Ready
+    const keys = didcomm.generateKeyPair()
+    const encoded = didcomm.ed25519PubEncoder.encode(keys.publicKey)
+    expect(didcomm.ed25519PubEncoder.decode(encoded)).toEqual(keys.publicKey)
+  })
+})
