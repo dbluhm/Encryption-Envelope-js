@@ -197,7 +197,7 @@ export class DIDComm {
     }
 
     private strB64dec(input: any) {
-        return this.sodium.to_string(this.sodium.from_base64(input, this.sodium.base64_variants.URLSAFE))
+      return this.sodium.to_string(this.b64dec(input))
     }
 
     private encryptPlaintext(message: any, addData: any, key: any) {
